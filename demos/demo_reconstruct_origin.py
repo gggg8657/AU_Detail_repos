@@ -41,7 +41,7 @@ def main(args):
 
     # run DECA
     deca_cfg.model.use_tex = args.useTex
-    deca_cfg.rasterizer_type = "pytorch3d"
+    deca_cfg.rasterizer_type = args.rasterizer_type
     deca_cfg.model.extract_tex = args.extractTex
     deca = DECA(config = deca_cfg, device=device)
     # for i in range(len(testdata)):

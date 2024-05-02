@@ -10,11 +10,11 @@
 # why:
 # '''
 # pretrained_modelpath: '/ps/scratch/yfeng/Data/Projects-data/DECA-training/training/DECA_SIGGRAPH/pretrain/model.tar'
-output_dir: "Training/DECA_DJ2_mrf_clamp_max_enhanced_without_AU"
+output_dir: "Training/DECA_DJ2_AU_additional_AU_Loss"
 pretrained_modelpath: "/home/cine/DJ/DECA/data/deca_model.tar"
 dataset:
   batch_size: 64
-  K: 1  
+  K: 1
 train:
   train_detail: True
   resume: True
@@ -22,7 +22,7 @@ train:
   max_steps: 1000000
   log_steps: 10
   vis_steps: 500
-  checkpoint_steps: 1000 #1000 model.tar saved
+  checkpoint_steps: 1000
   val_steps: 500
   eval_steps: 1000
 dataset:
