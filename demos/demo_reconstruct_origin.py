@@ -23,7 +23,7 @@ from tqdm import tqdm
 import torch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from decalib.deca_AU import DECA
+from decalib.deca import DECA
 from decalib.datasets import datasets 
 from decalib.utils import util
 from decalib.utils.config import cfg as deca_cfg
@@ -32,7 +32,6 @@ from decalib.utils.tensor_cropper import transform_points
 def main(args):
     # if args.rasterizer_type != 'standard':
     #     args.render_orig = False
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
     savefolder = args.savefolder
     device = args.device
     os.makedirs(savefolder, exist_ok=True)
@@ -42,7 +41,7 @@ def main(args):
 
     # run DECA
     deca_cfg.model.use_tex = args.useTex
-    deca_cfg.rasterizer_type = "pytorch3d"
+    deca_cfg.rasterizer_type = args.rasterizer_type
     deca_cfg.model.extract_tex = args.extractTex
     deca = DECA(config = deca_cfg, device=device)
     # for i in range(len(testdata)):
@@ -50,7 +49,7 @@ def main(args):
         name = testdata[i]['imagename']
         images = testdata[i]['image'].to(device)[None,...]
         with torch.no_grad():
-            codedict= deca.encode(images)
+            codedict = deca.encode(images)
             opdict, visdict = deca.decode(codedict) #tensor
             if args.render_orig:
                 tform = testdata[i]['tform'][None, ...]

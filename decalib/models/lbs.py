@@ -267,7 +267,8 @@ def blend_shapes(betas, shape_disps):
     # Displacement[b, m, k] = sum_{l} betas[b, l] * shape_disps[m, k, l]
     # i.e. Multiply each shape displacement by its corresponding beta and
     # then sum them.
-    blend_shape = torch.einsum('bl,mkl->bmk', [betas, shape_disps])
+    # print(betas.device, shape_disps.device)
+    blend_shape = torch.einsum('bl,mkl->bmk', [betas, shape_disps]) #betas [4,150] => should be [16,150] shape_disps [5023,3,150]
     return blend_shape
 
 

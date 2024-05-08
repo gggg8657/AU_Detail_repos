@@ -9,8 +9,8 @@
 output_dir: "/ps/scratch/yfeng/Data/Projects-data/DECA-training/training/DECA_release_version/coarse"
 pretrained_modelpath: "/ps/scratch/yfeng/Data/Projects-data/DECA-training/training/DECA_release_version/pretrain/model.tar"
 dataset:
-  batch_size: 8
-  K: 2
+  batch_size: 16
+  K: 1
 train:
   resume: True
   max_epochs: 10

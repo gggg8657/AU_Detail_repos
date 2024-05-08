@@ -19,6 +19,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from skimage.io import imread
 import imageio
+import pickle
 from . import util
 
 def set_rasterizer(type = 'pytorch3d'):
@@ -35,6 +36,7 @@ def set_rasterizer(type = 'pytorch3d'):
         # ref: https://pytorch.org/tutorials/advanced/cpp_extension.html
         from torch.utils.cpp_extension import load, CUDA_HOME
         curr_dir = os.path.dirname(__file__)
+        print("\n\n\nthis it curr dir ***"+curr_dir)
         standard_rasterize_cuda = \
             load(name='standard_rasterize_cuda', 
                 sources=[f'{curr_dir}/rasterizer/standard_rasterize_cuda.cpp', f'{curr_dir}/rasterizer/standard_rasterize_cuda_kernel.cu'], 
@@ -43,6 +45,7 @@ def set_rasterizer(type = 'pytorch3d'):
         # If JIT does not work, try manually installation first
         # 1. see instruction here: pixielib/utils/rasterizer/INSTALL.md
         # 2. add this: "from .rasterizer.standard_rasterize_cuda import standard_rasterize" here
+        from .rasterizer.standard_rasterize_cuda import standard_rasterize
 
 class StandardRasterizer(nn.Module):
     """ Alg: https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation

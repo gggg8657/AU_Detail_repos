@@ -16,9 +16,9 @@ class VGGFace2Dataset(Dataset):
         '''
         self.K = K
         self.image_size = image_size
-        self.imagefolder = '/ps/scratch/face2d3d/train'
-        self.kptfolder = '/ps/scratch/face2d3d/train_annotated_torch7'
-        self.segfolder = '/ps/scratch/face2d3d/texture_in_the_wild_code/VGGFace2_seg/test_crop_size_400_batch'
+        self.imagefolder = '/mnt/hdd/dataset/VGGFace2_HQ/images'
+        self.kptfolder = '/mnt/hdd/dataset/VGGFace2_HQ/kpts'
+        self.segfolder = '/mnt/hdd/dataset/VGGFace2_HQ/cropimage'
         # hq:
         # datafile = '/ps/scratch/face2d3d/texture_in_the_wild_code/VGGFace2_cleaning_codes/ringnetpp_training_lists/second_cleaning/vggface2_bbx_size_bigger_than_400_train_list_max_normal_100_ring_5_1_serial.npy'
         datafile = '/ps/scratch/face2d3d/texture_in_the_wild_code/VGGFace2_cleaning_codes/ringnetpp_training_lists/second_cleaning/vggface2_train_list_max_normal_100_ring_5_1_serial.npy'
@@ -128,9 +128,9 @@ class VGGFace2HQDataset(Dataset):
         '''
         self.K = K
         self.image_size = image_size
-        self.imagefolder = '/ps/scratch/face2d3d/train'
-        self.kptfolder = '/ps/scratch/face2d3d/train_annotated_torch7'
-        self.segfolder = '/ps/scratch/face2d3d/texture_in_the_wild_code/VGGFace2_seg/test_crop_size_400_batch'
+        self.imagefolder = '/mnt/hdd/dataset/VGGFace2_HQ/images'
+        self.kptfolder = '/mnt/hdd/dataset/VGGFace2_HQ/kpts'
+        self.segfolder = '/mnt/hdd/dataset/VGGFace2_HQ/cropimage'
         # hq:
         # datafile = '/ps/scratch/face2d3d/texture_in_the_wild_code/VGGFace2_cleaning_codes/ringnetpp_training_lists/second_cleaning/vggface2_bbx_size_bigger_than_400_train_list_max_normal_100_ring_5_1_serial.npy'
         datafile = '/ps/scratch/face2d3d/texture_in_the_wild_code/VGGFace2_cleaning_codes/ringnetpp_training_lists/second_cleaning/vggface2_bbx_size_bigger_than_400_train_list_max_normal_100_ring_5_1_serial.npy'

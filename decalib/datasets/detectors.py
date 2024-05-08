@@ -20,7 +20,7 @@ class FAN(object):
     def __init__(self):
         import face_alignment
         self.model = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
-
+        
     def run(self, image):
         '''
         image: 0-255, uint8, rgb, [h, w, 3]
@@ -57,4 +57,32 @@ class MTCNN(object):
             return bbox, 'bbox'
 
 
+class RetinaFace:
+    def __init__(self, type):
+        from retinaface import RetinaFace
+        self.face_detector = RetinaFace()
+        self.type = type
+        self.mot_tracker = Sort()
+
+    def run(self, image):
+        obj = self.face_detector.predict(rgb_image=image, threshold=0.9)
+        if obj is None or len(obj)==0:
+            return [0], 'bbox'
+        identity = obj[0]
+
+        left = identity['x1']
+        right = identity['x2']
+        top = identity['y1']
+        bottom = identity['y2']
+        bbox = [left, top, right, bottom]
+
+        if self.type =='video':
+            bboxes = []
+            for identity in obj:
+                bboxes.append([identity['x1'], identity['y1'],identity['x2'], identity['y2']])
+            track_bbs_ids = self.mot_tracker.update(np.array(bboxes))  # !!!
+            bbox = track_bbs_ids[0, :4]
+            # bbox = track_bbs_ids[-1, :4]
+            # bbox = track_bbs_ids[0, :4]
+        return bbox, 'bbox'
 

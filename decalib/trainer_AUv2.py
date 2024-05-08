@@ -37,12 +37,18 @@ from .utils.rotation_converter import batch_euler2axis
 from .datasets import datasets
 from .utils.config import cfg
 torch.backends.cudnn.benchmark = True
-from .utils import lossfunc
+from .utils import lossfunc_AU as lossfunc
+
+from .models.OpenGraphAU.model.ANFL import AFG
+from .models.OpenGraphAU.utils import load_state_dict
+from .models.OpenGraphAU.utils import *
+from .models.OpenGraphAU.conf import get_config,set_logger,set_outdir,set_env
+
 from .datasets import build_datasets_detail as build_datasets
 # from .datasets import build_datasets
 
 class Trainer(object):
-    def __init__(self, model, config=None, device='cuda:1'):
+    def __init__(self, model, config=None, device='cuda'):
         if config is None:
             self.cfg = cfg
         else:
@@ -63,9 +69,7 @@ class Trainer(object):
         # initialize loss  
         # # initialize loss   
         if self.train_detail:     
-            # self.mrf_loss = lossfunc.IDMRFLoss()
-            self.perceptual_loss = lossfunc.PerceptualLoss()
-            # self.vgg16_loss = lossfunc.VGGLoss()
+            self.mrf_loss = lossfunc.IDMRFLoss() 
             self.face_attr_mask = util.load_local_mask(image_size=self.cfg.model.uv_size, mode='bbx')
         else:
             self.id_loss = lossfunc.VGGFace2Loss(pretrained_model=self.cfg.model.fr_model_path)      
@@ -88,6 +92,7 @@ class Trainer(object):
                                     lr=self.cfg.train.lr,
                                     amsgrad=False)
     def load_checkpoint(self):
+        self.auconf = get_config()
         model_dict = self.deca.model_dict()
         # resume training, including model weight, opt, steps
         # import ipdb; ipdb.set_trace()
@@ -109,6 +114,9 @@ class Trainer(object):
         else:
             logger.info('model path not found, start training from scratch')
             self.global_step = 0
+        self.AU_net = AFG(num_main_classes=self.auconf.num_main_classes, num_sub_classes=self.auconf.num_sub_classes, backbone=self.auconf.arc).to(self.device)
+        self.AU_net = load_state_dict(self.AU_net, self.auconf.resume).to(self.device)
+        self.AU_net.eval()
 
     def training_step(self, batch, batch_nb, training_type='coarse'):
         self.deca.train()
@@ -273,26 +281,30 @@ class Trainer(object):
             
             losses['photo_detail'] = (uv_texture_patch*uv_vis_mask_patch - uv_texture_gt_patch*uv_vis_mask_patch).abs().mean()*self.cfg.loss.photo_D
             
+
+           
+
             #old mrf
             # masks = masks*mask_face_eye*ops['alpha_images']
             # losses['photo_detail_mrf'] = self.mrf_loss(uv_texture_patch*uv_vis_mask_patch, masks*uv_texture_gt_patch*uv_vis_mask_patch)*0.1
-            #losses['L2_relu_loss'] = self.mrf_loss(uv_texture_patch*uv_vis_mask_patch, uv_texture_gt_patch*uv_vis_mask_patch)*self.cfg.loss.photo_D*self.cfg.loss.mrf
             
-            # losses['photo_detail_mrf'] = self.mrf_loss(uv_texture_patch*uv_vis_mask_patch, uv_texture_gt_patch*uv_vis_mask_patch)*self.cfg.loss.photo_D*self.cfg.loss.mrf
-
-            losses['perceptual_detail'] = self.perceptual_loss(uv_texture_patch*uv_vis_mask_patch, uv_texture_gt_patch*uv_vis_mask_patch)*self.cfg.loss.photo_D
-            # losses['vgg16_loss'] = self.vgg16_loss(uv_texture_patch*uv_vis_mask_patch, uv_texture_gt_patch*uv_vis_mask_patch)*self.cfg.loss.photo_D*self.cfg.loss.mrf
+            losses['photo_detail_mrf'] = self.mrf_loss(uv_texture_patch*uv_vis_mask_patch, uv_texture_gt_patch*uv_vis_mask_patch)*self.cfg.loss.photo_D*self.cfg.loss.mrf
 
             losses['z_reg'] = torch.mean(uv_z.abs())*self.cfg.loss.reg_z
             losses['z_diff'] = lossfunc.shading_smooth_loss(uv_shading)*self.cfg.loss.reg_diff
             if self.cfg.loss.reg_sym > 0.:
                 nonvis_mask = (1 - util.binary_erosion(uv_vis_mask))
                 losses['z_sym'] = (nonvis_mask*(uv_z - torch.flip(uv_z, [-1]).detach()).abs()).sum()*self.cfg.loss.reg_sym
+            img_afn = self.AU_net(images)[1]
+            rend_afn = self.AU_net(predicted_detail_images)[1]
+            losses['AU_feature'] = F.mse_loss(img_afn,rend_afn)
+            #original opdict location
             opdict = {
                 'verts': verts,
                 'trans_verts': trans_verts,
                 'landmarks2d': landmarks2d,
                 # 'mp_landmark': mp_landmark,
+                # 'predicted_deatil_shape' : 
                 'predicted_images': predicted_images,
                 'predicted_detail_images': predicted_detail_images,
                 'images': images,

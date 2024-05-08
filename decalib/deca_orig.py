@@ -36,7 +36,7 @@ from .utils.config import cfg
 torch.backends.cudnn.benchmark = True
 
 class DECA(nn.Module):
-    def __init__(self, config=None, device='cuda:1'):
+    def __init__(self, config=None, device='cuda'):
         super(DECA, self).__init__()
         if config is None:
             self.cfg = cfg
@@ -75,8 +75,6 @@ class DECA(nn.Module):
         self.param_dict = {i:model_cfg.get('n_' + i) for i in model_cfg.param_list}
 
         # encoders
-        # self.E_flame = nn.DataParallel(ResnetEncoder(outsize=self.n_param), device_ids=[1,0]).to(self.device) 
-        # self.E_detail = nn.DataParallel(ResnetEncoder(outsize=self.n_detail), device_ids=[1,0]).to(self.device)
         self.E_flame = ResnetEncoder(outsize=self.n_param).to(self.device) 
         self.E_detail = ResnetEncoder(outsize=self.n_detail).to(self.device)
         # decoders
